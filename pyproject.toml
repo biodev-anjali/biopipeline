@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=63", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bio-pipeline"
+version = "0.1.0"
+description = "Shared helpers for the Bio-Pipeline FastAPI backend."
+authors = [{name = "Bio Pipeline Team"}]
+requires-python = ">=3.10"
+dependencies = ["biopython>=1.83"]
+
+[project.optional-dependencies]
+dev = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["biopipeline*"]
+
