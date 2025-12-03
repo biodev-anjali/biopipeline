@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, HttpUrl, model_validator
+from pydantic import BaseModel, Field, HttpUrl, root_validator
 
 
 class LedgerBlock(BaseModel):
@@ -57,7 +57,7 @@ class FetchRequest(BaseModel):
     url: HttpUrl | None = None
     filename: str | None = None
 
-    @model_validator(mode="after")
+    @root_validator()
     def validate_payload(self) -> "FetchRequest":
         if not self.source_id and not self.url:
             raise ValueError("Either source_id or url must be provided")
