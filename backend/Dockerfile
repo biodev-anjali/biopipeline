@@ -2,7 +2,7 @@
 FROM python:3.10-slim as base
 
 # For build time speedup, separate static requirements install
-COPY backend/requirements.txt /tmp/
+COPY requirements.txt /tmp/
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r /tmp/requirements.txt
 
