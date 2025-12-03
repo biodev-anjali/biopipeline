@@ -8,7 +8,7 @@ RUN pip install --upgrade pip \
 
 # Copy app and bio-pipeline package
 WORKDIR /app
-COPY backend/app ./app
+COPY app ./app
 COPY biopipeline ./biopipeline
 COPY pyproject.toml ./
 RUN pip install --no-cache-dir -e .
