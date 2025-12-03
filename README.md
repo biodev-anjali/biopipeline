@@ -67,25 +67,6 @@ Or, with Docker Compose (needs Docker Desktop):
 
 ---
 
-## 🚀 Deploy to Cloud or Docker
-
-### Backend (FastAPI)
-- **Render.com:**
-  - Connect repo, set root to `backend/`, build: `pip install -r requirements.txt && pip install -e .`, start: `uvicorn app.main:app --host 0.0.0.0 --port 8000`
-  - Add persistent disk for `/app/app/storage` for uploads/ledger.
-- **Docker:**
-  - `docker build -t bio-backend ./backend`
-  - `docker run -p 8000:8000 bio-backend`
-
-### Frontend (Next.js)
-- **Vercel:**
-  - Connect repo, set root to `frontend/`.
-  - Set: `NEXT_PUBLIC_API_BASE_URL` to your Render backend URL.
-- **Docker:**
-  - `docker build -t bio-frontend ./frontend`
-  - `docker run -p 3000:3000 bio-frontend`
-
----
 
 ## 🧑‍🚀 Personalize for Portfolio
 
@@ -99,7 +80,6 @@ NEXT_PUBLIC_PROFILE_LINKEDIN=https://linkedin.com/in/yourprofile
 NEXT_PUBLIC_PROFILE_GITHUB=https://github.com/yourhandle
 NEXT_PUBLIC_API_BASE_URL=https://your-fastapi-backend.onrender.com
 ```
-You can safely commit `.env.example` but not your real secrets!
 
 ---
 
@@ -116,27 +96,3 @@ pyproject.toml     # Editable install (pip install -e .)
 .dockerignore, .gitignore
 ```
 
-## 📜 API Endpoints (Backend)
-| Endpoint                | Method | Description                          |
-|------------------------|--------|--------------------------------------|
-| /upload-fasta          | POST   | Upload local FASTA file              |
-| /fetch-fasta           | POST   | Fetch & record remote FASTA (URL/canned) |
-| /analyze/{filename}    | GET    | Parse and analyze uploaded file      |
-| /ledger                | GET    | Get the blockchain ledger            |
-| /ledger/add            | POST   | (Legacy) Add block manually          |
-| /fasta-sources         | GET    | List pre-curated remote datasets     |
-
----
-
-## 🪐 Screenshots
-
-*(Insert animated screenshots/GIF demo here)*
-
----
-
-## 📣 Extensibility/Tips
-- Add more FASTA sources to `backend/app/core/utils.py -> PREDEFINED_FASTA_SOURCES`.
-- Add lab modules by making new pages/components in `frontend/pages/` and wiring in new endpoints.
-- Replace all dummy profile ENV values for your portfolio.
-
-**Good luck on your cosmic genomics journey!**
