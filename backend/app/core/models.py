@@ -57,7 +57,7 @@ class FetchRequest(BaseModel):
     url: HttpUrl | None = None
     filename: str | None = None
 
-    @root_validator()
+    @root_validator(skip_on_failure=True)
     def validate_payload(self) -> "FetchRequest":
         if not self.source_id and not self.url:
             raise ValueError("Either source_id or url must be provided")
