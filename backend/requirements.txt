@@ -3,3 +3,5 @@ pydantic>=2.6
 uvicorn[standard]
 biopython>=1.83
 requests
+python-multipart
+
