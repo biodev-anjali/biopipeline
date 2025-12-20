@@ -8,23 +8,21 @@ _"Analyze, visualize, and immortalize FASTA sequences with a web sci-fi genomics
 
 ## 🪐 What is Bio-Pipeline?
 
-Bio-Pipeline is a showpiece web application where you (or any explorer!) can:
+Bio-Pipeline is a full-stack web application for genomic sequence analysis and provenance tracking. It provides:
 
-- Beam up public FASTA datasets _from across the web_ or upload your own.
-- Instantly compute sequence QC (GC%, length, preview) with Biopython.
-- Hash every sequence with SHA-256 (crypto-level) to guarantee provenance.
-- Every sequence event writes a new **block** to an immutable ledger (blockchain style).
-- See all blocks and sequence stats in a sci-fi, magical, animated interface.
-- [Easy deployment to Render, Vercel, Docker, or local](#deploy-to-cloud-or-docker).
-
-_Tech for biohackers, students, and portfolio astronauts!_
+- **FASTA Sequence Processing**: Upload local files or fetch public datasets from remote sources
+- **Quality Control Analysis**: Automated QC metrics (GC content, sequence length, previews) using Biopython
+- **Cryptographic Hashing**: SHA-256 hashing for sequence integrity and provenance verification
+- **Immutable Ledger**: Blockchain-style ledger system that records all sequence events with hash-linked blocks
+- **Modern Web Interface**: Responsive, animated UI built with Next.js, Tailwind CSS, and Framer Motion
+- **RESTful API**: FastAPI backend with comprehensive endpoints for all operations
 
 ## ✨ Features
-- 🔬 **Sequence Intake Lab**: upload or fetch (remote) FASTA, auto-ingested and blockchained
-- 🧪 **QC Analyzer**: Biopython-powered GC content and length, with live chart
-- ⛓️ **Ledger Observatory**: browse/download full blockchain ledger, real-time updates
-- 🪄 **Magical UX**: animated, glowing, “deep space” sci-fi vibe (built with Tailwind & Framer Motion)
-- 🦸 **Showcase Ready**: set your name/pic/bio via environment variables for portfolio/demo
+- 🔬 **Sequence Intake Lab**: Upload local FASTA files or fetch from curated remote datasets
+- 🧪 **QC Analyzer**: Biopython-powered sequence analysis with GC content, length metrics, and visualizations
+- ⛓️ **Ledger Observatory**: Browse and download the complete blockchain ledger with real-time updates
+- 🔐 **Cryptographic Provenance**: SHA-256 hashing ensures data integrity and traceability
+- 🪄 **Modern UI**: Responsive, animated interface with real-time data visualization
 
 ---
 
@@ -68,18 +66,121 @@ Or, with Docker Compose (needs Docker Desktop):
 ---
 
 
-## 🧑‍🚀 Personalize for Portfolio
+## 🔧 Configuration
 
-Set these in `frontend/.env.local`:
+Set the API base URL in `frontend/.env.local`:
 ```env
-NEXT_PUBLIC_PROFILE_NAME=Nova Stellar
-NEXT_PUBLIC_PROFILE_TITLE=Lead Bioinformatics Engineer
-NEXT_PUBLIC_PROFILE_BIO=Explorer of genomic constellations...
-NEXT_PUBLIC_PROFILE_CONTACT=contact@example.com
-NEXT_PUBLIC_PROFILE_LINKEDIN=https://linkedin.com/in/yourprofile
-NEXT_PUBLIC_PROFILE_GITHUB=https://github.com/yourhandle
-NEXT_PUBLIC_API_BASE_URL=https://your-fastapi-backend.onrender.com
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
+
+For production deployments, update this to your backend URL.
+
+---
+
+## 📡 API Documentation
+
+The FastAPI backend provides the following endpoints:
+
+### Analysis Endpoints
+
+- `POST /upload-fasta` - Upload a FASTA file
+  - Request: Multipart form data with file
+  - Response: `UploadResponse` with filename, hash, and ledger block
+
+- `GET /analyze/{filename}` - Analyze a stored FASTA file
+  - Response: `AnalysisResponse` with length, GC%, and sequence preview
+
+- `GET /fasta-sources` - List available remote FASTA sources
+  - Response: `FastaSourceList` with curated dataset information
+
+- `POST /fetch-fasta` - Fetch a FASTA file from a remote source
+  - Request: `FetchRequest` with source_id or url
+  - Response: `FetchResponse` with filename, hash, and ledger block
+
+### Hashing Endpoints
+
+- `POST /hash/{filename}` - Generate SHA-256 hash for a stored file
+  - Response: `HashResponse` with filename and hash
+
+### Ledger Endpoints
+
+- `GET /ledger` - Retrieve the complete blockchain ledger
+  - Response: `LedgerResponse` with array of ledger blocks
+
+- `POST /ledger/add` - Manually add a block to the ledger
+  - Request: `LedgerAddRequest` with filename and optional hash
+  - Response: `LedgerResponse` with updated ledger
+
+### Health Check
+
+- `GET /` - Health check endpoint
+  - Response: `{"status": "ok"}`
+
+The API automatically generates interactive documentation at `/docs` (Swagger UI) and `/redoc` when the server is running.
+
+---
+
+## 🏗️ Architecture
+
+### Backend Architecture
+
+```
+backend/
+├── app/
+│   ├── main.py              # FastAPI application entry point
+│   ├── core/
+│   │   ├── models.py        # Pydantic models for request/response validation
+│   │   └── utils.py         # Business logic: FASTA analysis, hashing, ledger management
+│   └── routers/
+│       ├── analysis.py      # FASTA upload, analysis, and fetch endpoints
+│       ├── hashing.py       # Cryptographic hashing operations
+│       └── ledger.py        # Blockchain ledger management
+├── biopipeline/
+│   ├── bio/
+│   │   └── fasta_qc.py      # Biopython-based sequence analysis
+│   └── blockchain/
+│       └── hash.py          # SHA-256 hashing utilities
+└── storage/
+    └── uploads/             # Local file storage for uploaded FASTA files
+```
+
+### Frontend Architecture
+
+```
+frontend/
+├── pages/
+│   ├── index.js             # Home page with feature overview
+│   ├── upload.js            # Sequence intake interface
+│   ├── analyze.js           # QC analysis interface
+│   └── ledger.js            # Ledger observatory
+├── components/
+│   ├── Navbar.jsx           # Navigation component
+│   ├── UploadBox.jsx        # File upload interface
+│   ├── FetchBox.jsx         # Remote dataset fetcher
+│   ├── LabPanel.jsx         # Feature overview cards
+│   ├── ResultCard.jsx       # Analysis results display
+│   └── LedgerTable.jsx      # Ledger block visualization
+└── lib/
+    └── api.js               # API client functions
+```
+
+### Data Flow
+
+1. **Upload/Fetch**: User uploads or fetches a FASTA file
+2. **Storage**: File is saved to `backend/app/storage/uploads/`
+3. **Hashing**: SHA-256 hash is calculated for the file
+4. **Ledger Entry**: A new block is created and appended to the ledger JSON file
+5. **Analysis**: Biopython processes the sequence and calculates QC metrics
+6. **Visualization**: Frontend displays results with charts and tables
+
+### Ledger Structure
+
+The ledger uses a blockchain-style structure where each block contains:
+- `index`: Sequential block number
+- `filename`: Name of the FASTA file
+- `hash`: SHA-256 hash of the file
+- `timestamp`: ISO 8601 timestamp
+- `prev_hash`: Hash of the previous block (creates the chain)
 
 ---
 

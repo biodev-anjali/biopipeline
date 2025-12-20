@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
-import ProfileCard from "@/components/ProfileCard";
 import LabPanel from "@/components/LabPanel";
 
 export default function Home() {
@@ -10,12 +9,12 @@ export default function Home() {
       <div className="aurora" />
       <Navbar />
       <main className="mx-auto flex max-w-6xl flex-col gap-16 px-6 py-16">
-        <section className="grid gap-10 md:grid-cols-[1.4fr,1fr]">
+        <section>
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="space-y-6"
+            className="space-y-6 max-w-4xl"
           >
             <p className="inline-flex items-center rounded-full border border-slate-800 px-4 py-1 text-xs uppercase tracking-[0.4em] text-slate-400">
               Bio-Pipeline · Deep Space Lab
@@ -43,7 +42,6 @@ export default function Home() {
               </Link>
             </div>
           </motion.div>
-          <ProfileCard />
         </section>
 
         <section className="space-y-6">
