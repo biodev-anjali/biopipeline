@@ -61,3 +61,24 @@ export async function fetchRemoteFasta(payload) {
   return handleResponse(res);
 }
 
+export async function getAnalysisHistory(filename = null, limit = null) {
+  const params = new URLSearchParams();
+  if (filename) params.append("filename", filename);
+  if (limit) params.append("limit", limit.toString());
+  
+  const queryString = params.toString();
+  const url = `${API_BASE}/analysis-history${queryString ? `?${queryString}` : ""}`;
+  const res = await fetch(url);
+  return handleResponse(res);
+}
+
+export async function getAnalysisHistoryByFilename(filename, limit = null) {
+  const params = new URLSearchParams();
+  if (limit) params.append("limit", limit.toString());
+  
+  const queryString = params.toString();
+  const url = `${API_BASE}/analysis-history/${encodeURIComponent(filename)}${queryString ? `?${queryString}` : ""}`;
+  const res = await fetch(url);
+  return handleResponse(res);
+}
+

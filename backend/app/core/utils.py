@@ -18,6 +18,7 @@ from biopipeline.blockchain.hash import get_file_hash  # type: ignore
 STORAGE_DIR = Path(__file__).resolve().parents[1] / "storage"
 UPLOAD_DIR = STORAGE_DIR / "uploads"
 LEDGER_FILE = STORAGE_DIR / "ledger.json"
+HISTORY_FILE = STORAGE_DIR / "analysis_history.json"
 
 PREDEFINED_FASTA_SOURCES = [
     {
@@ -47,6 +48,8 @@ def ensure_storage() -> None:
     LEDGER_FILE.parent.mkdir(parents=True, exist_ok=True)
     if not LEDGER_FILE.exists():
         LEDGER_FILE.write_text("[]", encoding="utf-8")
+    if not HISTORY_FILE.exists():
+        HISTORY_FILE.write_text("[]", encoding="utf-8")
 
 
 def get_upload_path(filename: str) -> Path:
@@ -169,4 +172,75 @@ def fetch_remote_fasta(source_url: str, filename: str | None = None) -> tuple[st
     file_hash = calculate_file_hash(destination.name)
     block = record_file_ingest(destination.name, file_hash)
     return destination.name, block
+
+
+def load_analysis_history() -> list[dict[str, Any]]:
+    """Read the analysis history from disk."""
+    ensure_storage()
+    try:
+        return json.loads(HISTORY_FILE.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=500, detail="History file corrupted") from exc
+
+
+def save_analysis_history(entries: list[dict[str, Any]]) -> None:
+    """Persist the analysis history entries to disk."""
+    HISTORY_FILE.write_text(json.dumps(entries, indent=2), encoding="utf-8")
+
+
+def append_analysis_history(
+    filename: str,
+    analysis_result: dict[str, Any],
+    file_hash: str | None = None,
+) -> dict[str, Any]:
+    """Add a new analysis entry to the history and return it."""
+    history = load_analysis_history()
+    
+    # Generate unique ID
+    entry_id = f"{int(time.time())}_{len(history)}"
+    
+    # Get file hash if not provided
+    if file_hash is None:
+        try:
+            file_hash = calculate_file_hash(filename)
+        except HTTPException:
+            file_hash = "unknown"
+    
+    entry = {
+        "id": entry_id,
+        "filename": filename,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "analysis": {
+            "length": analysis_result.get("length", 0),
+            "gc_percent": analysis_result.get("gc_percent", 0.0),
+            "sequence_preview": analysis_result.get("sequence_preview", ""),
+        },
+        "file_hash": file_hash,
+        "analysis_type": "full",
+    }
+    
+    history.append(entry)
+    save_analysis_history(history)
+    return entry
+
+
+def get_analysis_history(
+    filename: str | None = None,
+    limit: int | None = None,
+) -> list[dict[str, Any]]:
+    """Retrieve analysis history with optional filtering."""
+    history = load_analysis_history()
+    
+    # Filter by filename if provided
+    if filename:
+        history = [entry for entry in history if entry.get("filename") == filename]
+    
+    # Sort by timestamp (newest first)
+    history.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    
+    # Apply limit if provided
+    if limit is not None and limit > 0:
+        history = history[:limit]
+    
+    return history
 

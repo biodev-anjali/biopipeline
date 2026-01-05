@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field, HttpUrl, model_validator
 
 
@@ -70,3 +72,21 @@ class FetchResponse(BaseModel):
     ledger_block: LedgerBlock
     source: str
 
+
+class AnalysisHistoryEntry(BaseModel):
+    id: str
+    filename: str
+    timestamp: str
+    analysis: dict[str, Any]
+    file_hash: str
+    analysis_type: str = "full"
+
+
+class HistoryResponse(BaseModel):
+    history: list[AnalysisHistoryEntry]
+    total: int
+
+
+class HistoryQuery(BaseModel):
+    filename: str | None = None
+    limit: int | None = Field(None, ge=1, le=1000)

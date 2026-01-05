@@ -36,8 +36,17 @@ async def upload_fasta(file: UploadFile = File(...)) -> models.UploadResponse:
 
 @router.get("/analyze/{filename}", response_model=models.AnalysisResponse)
 async def analyze_fasta(filename: str) -> models.AnalysisResponse:
-    """Run QC analysis on the requested FASTA."""
+    """Run QC analysis on the requested FASTA and save to history."""
     stats = utils.analyze_fasta(filename)
+    
+    # Auto-save to history
+    try:
+        file_hash = utils.calculate_file_hash(filename)
+        utils.append_analysis_history(filename, stats, file_hash)
+    except Exception:
+        # Don't fail the analysis if history save fails
+        pass
+    
     return models.AnalysisResponse(**stats)
 
 
@@ -68,4 +77,32 @@ async def fetch_fasta(payload: models.FetchRequest) -> models.FetchResponse:
         ledger_block=models.LedgerBlock(**block),
         source=source_label,
     )
+
+
+@router.get("/analysis-history", response_model=models.HistoryResponse)
+async def get_analysis_history(
+    filename: str | None = None,
+    limit: int | None = None,
+) -> models.HistoryResponse:
+    """Retrieve analysis history with optional filtering by filename and limit."""
+    history_entries = utils.get_analysis_history(filename=filename, limit=limit)
+    
+    # Convert to models
+    entries = [models.AnalysisHistoryEntry(**entry) for entry in history_entries]
+    
+    return models.HistoryResponse(history=entries, total=len(entries))
+
+
+@router.get("/analysis-history/{filename}", response_model=models.HistoryResponse)
+async def get_analysis_history_by_filename(
+    filename: str,
+    limit: int | None = None,
+) -> models.HistoryResponse:
+    """Retrieve analysis history for a specific filename."""
+    history_entries = utils.get_analysis_history(filename=filename, limit=limit)
+    
+    # Convert to models
+    entries = [models.AnalysisHistoryEntry(**entry) for entry in history_entries]
+    
+    return models.HistoryResponse(history=entries, total=len(entries))
 
